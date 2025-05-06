@@ -2,7 +2,9 @@ import { dirname, importx } from "@discordx/importer";
 import type { Interaction, Message } from "discord.js";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
-import 'dotenv/config';
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const bot = new Client({
   // To use only guild command
@@ -62,12 +64,12 @@ async function run() {
   await importx(`${dirname(import.meta.url)}/{events,commands}/**/*.{ts,js}`);
 
   // Let's start the bot
-  if (!process.env.BOT_TOKEN) {
-    throw Error("Could not find BOT_TOKEN in your environment");
+  if (!process.env.TOKEN_BOT) {
+    throw Error("Could not find TOKEN_BOT in your environment");
   }
 
   // Log in with your bot token
-  await bot.login(process.env.BOT_TOKEN);
+  await bot.login(process.env.TOKEN_BOT);
 }
 
 void run();
