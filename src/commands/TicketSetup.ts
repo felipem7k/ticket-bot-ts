@@ -2,10 +2,12 @@ import { ActionRowBuilder, CommandInteraction, MessageActionRowComponentBuilder,
 import { Discord, Slash, SelectMenuComponent } from "discordx";
 import SendCreateMessageController from "../controllers/ticketSetup/SendCreateMessageController.ts";
 import TicketSetupOptionInterface from "../interface/ticketSetup/TicketSetupOptionInterface.ts";
+import SetCreateTicketMessageController from "../controllers/ticketSetup/SetCreateTicketMessageController.ts";
 
 function getSetupOption(option: string): TicketSetupOptionInterface {
     const optionsControllers: Record<string, new () => TicketSetupOptionInterface> = {
         "send-create-ticket-message": SendCreateMessageController,
+        "set-create-ticket-message": SetCreateTicketMessageController,
     };
 
     const Controller = optionsControllers[option];
@@ -41,6 +43,10 @@ export class TicketSetup {
             {
                 label: "Enviar mensagem de criação de ticket",
                 value: "send-create-ticket-message"
+            },
+            {
+                label: "Definir mensagem de criação de ticket",
+                value: "set-create-ticket-message"
             }
         ];
         const menu = new StringSelectMenuBuilder({
