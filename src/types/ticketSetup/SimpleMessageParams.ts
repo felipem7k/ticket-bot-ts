@@ -4,4 +4,6 @@ export type SimpleMessageParams = {
     title?: string,
     description: string,
     thumbnail?: Attachment,
+    useSeparator: boolean,
+    selectMenuDescription?: string,
 }

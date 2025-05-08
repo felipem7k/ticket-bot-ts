@@ -1,6 +1,6 @@
-import { ApplicationCommandOptionType, Attachment, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, TextDisplayBuilder} from "discord.js";
+import { ApplicationCommandOptionType, Attachment, AutocompleteInteraction, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, TextDisplayBuilder} from "discord.js";
 import { Discord, Slash, SlashGroup, SlashOption } from "discordx";
-import { allowedImageTypes, createSimpleMessage } from "../../utils/messageContainers.ts";
+import { allowedImageTypes, renderTicketCreationMessage } from "../../utils/messageContainers.ts";
 
 @Discord()
 @SlashGroup({
@@ -19,9 +19,10 @@ export default class MessageController {
         await interaction.reply({
             flags: MessageFlags.IsComponentsV2,
             components: [
-                createSimpleMessage({
-                    title: "Teste",
-                    description: "deu bom"
+                renderTicketCreationMessage({
+                    title: "### TICKET",
+                    useSeparator: true,
+                    description: "Para receber **SUPORTE**, tirar **DÚVIDAS** ou realizar uma **COMPRA**, por favor, selecione uma das opções abaixo. Nossa equipe está pronta para ajudar assim que possível!"
                 })
             ],
             
@@ -39,6 +40,13 @@ export default class MessageController {
         })
         description: string,
         @SlashOption({
+            description: "Utilizar separador?",
+            name: "use-separator",
+            required: true,
+            type: ApplicationCommandOptionType.Boolean
+        })
+        useSeparator: boolean,
+        @SlashOption({
             description: "Título (utilize '#' no início para texto grande)",
             name: "title",
             required: false,
@@ -53,9 +61,16 @@ export default class MessageController {
             type: ApplicationCommandOptionType.Attachment
         })
         thumbnail: Attachment,
+        @SlashOption({
+            description: "Descrição do menu de seleção de assunto de tickets",
+            name: "select-menu-description",
+            maxLength: 100,
+            required: false,
+            type: ApplicationCommandOptionType.String
+        })
+        selectMenuDescription: string,
         interaction: CommandInteraction
     ): Promise<void> {
-        
         if (thumbnail && (!thumbnail.contentType || !allowedImageTypes.includes(thumbnail.contentType))) {
             await interaction.reply({
                 content: "Erro, thumbnail inválida.",
@@ -75,13 +90,14 @@ export default class MessageController {
                 new SeparatorBuilder({
                     spacing: SeparatorSpacingSize.Large
                 }),
-                createSimpleMessage({
+                renderTicketCreationMessage({
                     title,
+                    useSeparator,
                     description,
-                    thumbnail
+                    thumbnail,
+                    selectMenuDescription
                 })
-            ],
-            ephemeral: true
+            ]
         });
     }
 }
