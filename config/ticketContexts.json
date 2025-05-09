@@ -1,0 +1,50 @@
+[
+    {
+        "label": "Dúvidas",
+        "description": "Para tirar dúvidas gerais",
+        "value": "duvidas",
+        "emoji": "❓"
+    },
+    {
+        "label": "Suporte",
+        "description": "Para solicitar assistência técnica",
+        "value": "suporte",
+        "emoji": "🛠️"
+    },
+    {
+        "label": "Pagamentos",
+        "description": "Para resolver questões financeiras e pagamentos",
+        "value": "pagamentos",
+        "emoji": "💰"
+    },
+    {
+        "label": "Feedback",
+        "description": "Para enviar sugestões e opiniões",
+        "value": "feedback",
+        "emoji": "📝"
+    },
+    {
+        "label": "Compra",
+        "description": "Para aquisição de produtos",
+        "value": "compra",
+        "emoji": "🛒"
+    },
+    {
+        "label": "Consultoria",
+        "description": "Para pedidos de scripts personalizados",
+        "value": "consultoria",
+        "emoji": "💼"
+    },
+    {
+        "label": "Whitelist",
+        "description": "Para solicitação de entrada no servidor RP",
+        "value": "whitelist",
+        "emoji": "✅"
+    },
+    {
+        "label": "Denúncia",
+        "description": "Para reportar problemas com jogadores ou scripts no servidor RP",
+        "value": "denuncia",
+        "emoji": "⚠️"
+    }
+]

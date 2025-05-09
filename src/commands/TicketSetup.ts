@@ -7,6 +7,6 @@ import { Discord, Slash, SlashGroup } from "discordx";
 export class TicketSetup {
     @Slash({description: "Listar possíveis subcomandos"})
     async list(interaction: CommandInteraction) {
-        interaction.reply("Subcomandos disponíveis: `create`, `delete`, `list`");
+        interaction.reply("Subcomandos disponíveis: `setup`, `list`");
     }
 }

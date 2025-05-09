@@ -35,13 +35,7 @@ export function renderTicketCreationMessage(
     customContainer.addStringSelectMenu(
         "open-new-ticket",
         params.selectMenuDescription ?? "➡️ Clique aqui para selecionar o assunto do ticket",
-        [
-            {
-                description: "teste1",
-                label: "teste2",
-                value: "teste3"
-            }
-        ]
+        params.stringSelectMenuOptions
     );
 
     // const buttonSection = new SectionBuilder()

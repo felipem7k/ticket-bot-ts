@@ -1,4 +1,4 @@
-import { Attachment } from "discord.js"
+import { Attachment, SelectMenuComponentOptionData } from "discord.js"
 
 export type SimpleMessageParams = {
     title?: string,
@@ -6,4 +6,5 @@ export type SimpleMessageParams = {
     thumbnail?: Attachment,
     useSeparator: boolean,
     selectMenuDescription?: string,
+    stringSelectMenuOptions: SelectMenuComponentOptionData[]
 }
