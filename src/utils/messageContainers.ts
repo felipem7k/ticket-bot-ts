@@ -1,4 +1,4 @@
-import { ActionRowBuilder, Attachment, ButtonBuilder, ButtonStyle, ContainerBuilder, SectionBuilder, SeparatorBuilder, SeparatorSpacingSize, StringSelectMenuOptionBuilder, TextDisplayBuilder, ThumbnailBuilder } from "discord.js";
+import { MessageComponentInteraction, MessageFlags } from "discord.js";
 import { SimpleMessageParams } from "../types/ticketSetup/SimpleMessageParams.ts";
 import CustomContainer from "../components/CustomContainer.ts";
 
@@ -13,19 +13,18 @@ export function renderTicketCreationMessage(
     const description = params.description;
     const thumbnail = params.thumbnail;
 
+    const textParams = [
+        title,
+        description
+    ];
+
     if (thumbnail) {
         customContainer.addThumbnail(
             thumbnail.url,
-            [
-                title,
-                description
-            ]
+            textParams
         )
     } else {
-        customContainer.addText([
-            title,
-            description
-        ]);
+        customContainer.addText(textParams);
     }
 
     if (params.useSeparator) {
@@ -38,20 +37,18 @@ export function renderTicketCreationMessage(
         params.stringSelectMenuOptions
     );
 
-    // const buttonSection = new SectionBuilder()
-    // .addTextDisplayComponents(new TextDisplayBuilder({
-    //     content: "``Utilize o botão ao lado para abrir um novo ticket ➡️``"
-    // }))
-    // .setButtonAccessory(new ButtonBuilder({
-    //     custom_id: "create-ticket",
-    //     label: "📩",
-    //     style: ButtonStyle.Primary,
-    // }));
-
-
-    // attachToContainer(container, params.description, params.useSeparator, params.title, params.thumbnail);
-
-    // container.addSectionComponents(buttonSection);
 
     return customContainer.container;
+}
+
+export async function replyWithError(
+    interaction: MessageComponentInteraction, 
+    text: string
+): Promise<void> {
+    await interaction.reply({
+        flags: [
+            MessageFlags.Ephemeral
+        ],
+        content: text
+    });
 }

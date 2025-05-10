@@ -1,10 +1,10 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, Attachment, AutocompleteInteraction, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, StringSelectMenuComponent, StringSelectMenuInteraction, TextDisplayBuilder} from "discord.js";
-import { Discord, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
-import { allowedImageTypes, renderTicketCreationMessage } from "../../utils/messageContainers.ts";
+import { ActionRowBuilder, ApplicationCommandOptionType, Attachment, ButtonBuilder, ButtonStyle, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, ButtonInteraction, StringSelectMenuInteraction, TextDisplayBuilder} from "discord.js";
+import { ButtonComponent, Discord, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
+import { allowedImageTypes, renderTicketCreationMessage, replyWithError } from "../../utils/messageContainers.ts";
 import { getConfig } from "../../utils/configHandler.ts";
 
 const savedOptions = new Map();
-const selectMenuOptions = await getConfig("ticketContexts");
+const contextList = await getConfig("ticketContexts");
 
 @Discord()
 @SlashGroup({
@@ -25,7 +25,7 @@ export default class MessageController {
                     title: "### TICKET",
                     useSeparator: true,
                     description: "Para receber **SUPORTE**, tirar **DÚVIDAS** ou realizar uma **COMPRA**, por favor, selecione uma das opções abaixo. Nossa equipe está pronta para ajudar assim que possível!",
-                    stringSelectMenuOptions: selectMenuOptions
+                    stringSelectMenuOptions: contextList
                 })
             ],
             
@@ -76,17 +76,19 @@ export default class MessageController {
     ): Promise<void> {
         if (thumbnail && (!thumbnail.contentType || !allowedImageTypes.includes(thumbnail.contentType))) {
             await interaction.reply({
-                content: "Erro, thumbnail inválida.",
-                ephemeral: true
+                flags: [
+                    MessageFlags.Ephemeral
+                ],
+                content: "Erro, thumbnail inválida."
             });
             return;
         }
 
-        const stringMenu = new StringSelectMenuBuilder();
-        stringMenu.addOptions(selectMenuOptions);
-        stringMenu.setCustomId("ticket-message/on-selected-contexts")
-        stringMenu.setMinValues(1);
-        stringMenu.setMaxValues(selectMenuOptions.length);
+        const stringMenu = new StringSelectMenuBuilder()
+        .setCustomId("ticket-message/on-selected-contexts")
+        .setMinValues(1)
+        .setMaxValues(contextList.length)
+        .addOptions(contextList);
 
         savedOptions.set(interaction.user.id, {
             title,
@@ -120,15 +122,23 @@ export default class MessageController {
         id: "ticket-message/on-selected-contexts"
     })
     public async selected(interaction: StringSelectMenuInteraction): Promise<void> {
-        if (!interaction.values[0]) {
-            await interaction.reply({
-                content: "Ops! Selecione ao menos 1 opção."
-            });
-            savedOptions.delete(interaction.user.id)
+        const userId = interaction.user.id;
+        if (!savedOptions.has(userId)) {
+            await replyWithError(interaction, "Ocorreu algum erro, tente utilizar o comando novamente.");
             return;
         }
 
-        
+        if (!interaction.values[0]) {
+            await replyWithError(interaction, "Ops! Selecione ao menos 1 opção.");
+            savedOptions.delete(userId);
+            return;
+        }
+
+        savedOptions.set(userId, {
+            ...savedOptions.get(userId),
+            stringSelectMenuOptions: contextList.filter(option => interaction.values.includes(option.value))
+        })
+
         await interaction.reply({
             flags: [
                 MessageFlags.IsComponentsV2,
@@ -142,12 +152,35 @@ export default class MessageController {
                     spacing: SeparatorSpacingSize.Large
                 }),
                 renderTicketCreationMessage(
-                    {
-                        ...savedOptions.get(interaction.user.id),
-                        stringSelectMenuOptions: selectMenuOptions.filter(option => interaction.values.includes(option.value))
-                    }
-                )
+                    savedOptions.get(userId)
+                ),
+                new SeparatorBuilder({
+                    spacing: SeparatorSpacingSize.Large
+                }),
+                new ActionRowBuilder<ButtonBuilder>({
+                    components: [
+                        new ButtonBuilder({
+                            custom_id: "ticket-message/save-message",
+                            style: ButtonStyle.Primary,
+                            label: "Salvar",
+                            emoji: "💾"
+                        })
+                    ]
+                })
             ]
         });
+    }
+
+    @ButtonComponent({
+        id: "ticket-message/save-message"
+    })
+    public async saveMessage(
+        interaction: ButtonInteraction
+    ) {
+        const userId = interaction.user.id;
+        if (!savedOptions.has(userId)) {
+            await replyWithError(interaction, "Ocorreu algum erro, tente utilizar o comando novamente.");
+            return;
+        }
     }
 }
