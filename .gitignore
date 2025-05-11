@@ -9,3 +9,5 @@ yarn.lock
 build
 node_modules
 _backup
+
+firebase-cert.json

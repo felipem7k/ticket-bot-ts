@@ -6,7 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const BASE_PATH = path.resolve(__dirname, "../../config/");
 
-export async function getConfig(folder: string, inJson: boolean = false): Promise<any[]> {
+export async function getConfig<T>(folder: string, inJson: boolean = false): Promise<T | any> {
     try {
         const filePath = path.join(BASE_PATH, `${folder}.json`);
         const data = await fs.readFile(filePath, "utf-8");
