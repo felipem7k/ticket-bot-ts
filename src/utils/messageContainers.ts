@@ -1,4 +1,4 @@
-import { MessageComponentInteraction, MessageFlags } from "discord.js";
+import { CommandInteraction, MessageComponentInteraction, MessageFlags } from "discord.js";
 import { SimpleMessageParams } from "../types/ticketSetup/SimpleMessageParams.ts";
 import CustomContainer from "../components/CustomContainer.ts";
 
@@ -10,17 +10,19 @@ export function renderTicketCreationMessage(
     const customContainer = new CustomContainer();
 
     const title = params.title ?? "";
+    const footer = params.footer ?? "";
     const description = params.description;
     const thumbnail = params.thumbnail;
 
     const textParams = [
         title,
-        description
+        description,
+        footer
     ];
 
     if (thumbnail) {
         customContainer.addThumbnail(
-            thumbnail.url,
+            thumbnail,
             textParams
         )
     } else {
@@ -42,7 +44,7 @@ export function renderTicketCreationMessage(
 }
 
 export async function replyWithError(
-    interaction: MessageComponentInteraction, 
+    interaction: MessageComponentInteraction | CommandInteraction, 
     text: string
 ): Promise<void> {
     await interaction.reply({

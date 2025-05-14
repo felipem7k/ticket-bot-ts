@@ -1,10 +1,13 @@
-import { ActionRowBuilder, ApplicationCommandOptionType, Attachment, ButtonBuilder, ButtonStyle, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, ButtonInteraction, StringSelectMenuInteraction, TextDisplayBuilder} from "discord.js";
-import { ButtonComponent, Discord, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
+import { ActionRowBuilder, ApplicationCommandOptionType, Attachment, ButtonBuilder, ButtonStyle, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, ButtonInteraction, StringSelectMenuInteraction, TextDisplayBuilder, TextBasedChannel} from "discord.js";
+import { ButtonComponent, Discord, Guild, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
 import { allowedImageTypes, renderTicketCreationMessage, replyWithError } from "../../utils/messageContainers.ts";
 import { getConfig } from "../../utils/configHandler.ts";
+import GuildRepository from "../../repositories/GuildRepository.ts";
+import { SimpleMessageParams } from "../../types/ticketSetup/SimpleMessageParams.ts";
 
 const savedOptions = new Map();
 const contextList = await getConfig("ticketContexts");
+const guildRepository = new GuildRepository();
 
 @Discord()
 @SlashGroup({
@@ -16,19 +19,36 @@ const contextList = await getConfig("ticketContexts");
 export default class MessageController {
     @Slash({description: "Enviar mensagem de criação de tickets"})
     public async send(
+        @SlashOption({
+            description: "Canal para enviar a mensagem",
+            name: "channel",
+            required: true,
+            type: ApplicationCommandOptionType.Channel
+        })
+        channel: any,
         interaction: CommandInteraction
     ): Promise<void> {
-        await interaction.reply({
+        const customCreateMessage = await guildRepository.getCustomCreateMessage(
+            interaction.guild!.id
+        );
+        interaction.channel
+        if (!customCreateMessage) {
+            await replyWithError(interaction, "Erro, mensagem não definida. utilize ``/setup message set``");
+            return;
+        }
+
+        await channel.send({
             flags: MessageFlags.IsComponentsV2,
             components: [
-                renderTicketCreationMessage({
-                    title: "### TICKET",
-                    useSeparator: true,
-                    description: "Para receber **SUPORTE**, tirar **DÚVIDAS** ou realizar uma **COMPRA**, por favor, selecione uma das opções abaixo. Nossa equipe está pronta para ajudar assim que possível!",
-                    stringSelectMenuOptions: contextList
-                })
+                renderTicketCreationMessage(customCreateMessage)
             ],
-            
+        });
+
+        await interaction.reply({
+            flags: [
+                MessageFlags.Ephemeral
+            ],
+            content: "Mensagem enviada!"
         });
     }
 
@@ -58,6 +78,14 @@ export default class MessageController {
         })
         title: string,
         @SlashOption({
+            description: "Footer",
+            name: "footer",
+            required: false,
+            maxLength: 500,
+            type: ApplicationCommandOptionType.String
+        })
+        footer: string,
+        @SlashOption({
             description: "Thumbnail",
             name: "thumbnail",
             required: false,
@@ -75,12 +103,7 @@ export default class MessageController {
         interaction: CommandInteraction
     ): Promise<void> {
         if (thumbnail && (!thumbnail.contentType || !allowedImageTypes.includes(thumbnail.contentType))) {
-            await interaction.reply({
-                flags: [
-                    MessageFlags.Ephemeral
-                ],
-                content: "Erro, thumbnail inválida."
-            });
+            await replyWithError(interaction, "Erro, thumbnail inválida.");
             return;
         }
 
@@ -90,13 +113,18 @@ export default class MessageController {
         .setMaxValues(contextList.length)
         .addOptions(contextList);
 
+        if (footer) {
+            footer = `-# ${footer}`
+        }
+
         savedOptions.set(interaction.user.id, {
             title,
             useSeparator,
             description,
-            thumbnail,
+            footer,
+            thumbnail: thumbnail ? thumbnail.url : null,
             selectMenuDescription
-        })
+        });
 
         const actionRow = new ActionRowBuilder<StringSelectMenuBuilder>();
         actionRow.addComponents(stringMenu);
@@ -136,7 +164,7 @@ export default class MessageController {
 
         savedOptions.set(userId, {
             ...savedOptions.get(userId),
-            stringSelectMenuOptions: contextList.filter(option => interaction.values.includes(option.value))
+            stringSelectMenuOptions: contextList.filter((option: any) => interaction.values.includes(option.value))
         })
 
         await interaction.reply({
@@ -182,5 +210,21 @@ export default class MessageController {
             await replyWithError(interaction, "Ocorreu algum erro, tente utilizar o comando novamente.");
             return;
         }
+
+        if (!interaction.guild) {
+            return;
+        }
+
+        guildRepository.setCustomCreateMessage(
+            interaction.guild.id!,
+            savedOptions.get(userId)
+        );
+        
+        await interaction.reply({
+            flags: [
+                MessageFlags.Ephemeral
+            ],
+            content: "Mensagem salva com sucesso!"
+        });
     }
 }
