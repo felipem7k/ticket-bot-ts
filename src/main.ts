@@ -3,6 +3,9 @@ import type { Interaction, Message } from "discord.js";
 import { IntentsBitField } from "discord.js";
 import { Client } from "discordx";
 import dotenv from "dotenv";
+import { DatabaseConnection } from "./persistence/createDatabaseConnection.ts";
+
+DatabaseConnection.initialize();
 
 dotenv.config();
 

@@ -1,13 +1,12 @@
 import { ActionRowBuilder, ApplicationCommandOptionType, Attachment, ButtonBuilder, ButtonStyle, CommandInteraction, MessageFlags, SeparatorBuilder, SeparatorSpacingSize, StringSelectMenuBuilder, ButtonInteraction, StringSelectMenuInteraction, TextDisplayBuilder, TextBasedChannel} from "discord.js";
-import { ButtonComponent, Discord, Guild, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
+import { ButtonComponent, Discord, Guard, Guild, SelectMenuComponent, Slash, SlashGroup, SlashOption } from "discordx";
 import { allowedImageTypes, renderTicketCreationMessage, replyWithError } from "../../utils/messageContainers.ts";
 import { getConfig } from "../../utils/configHandler.ts";
 import GuildRepository from "../../repositories/GuildRepository.ts";
-import { SimpleMessageParams } from "../../types/ticketSetup/SimpleMessageParams.ts";
 
 const savedOptions = new Map();
 const contextList = await getConfig("ticketContexts");
-const guildRepository = new GuildRepository();
+const guildRepository: GuildRepository = new GuildRepository();
 
 @Discord()
 @SlashGroup({
@@ -17,6 +16,7 @@ const guildRepository = new GuildRepository();
 })
 @SlashGroup("message", "setup")
 export default class MessageController {
+
     @Slash({description: "Enviar mensagem de criação de tickets"})
     public async send(
         @SlashOption({
@@ -215,7 +215,7 @@ export default class MessageController {
             return;
         }
 
-        guildRepository.setCustomCreateMessage(
+        await guildRepository.setCustomCreateMessage(
             interaction.guild.id!,
             savedOptions.get(userId)
         );

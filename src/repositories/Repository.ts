@@ -1,9 +1,9 @@
 import admin from "firebase-admin";
-import { createDatabaseConnection } from "../persistence/createDatabaseConnection.ts";
+import { DatabaseConnection } from "../persistence/createDatabaseConnection.ts";
 
 export default abstract class Repository<T> {
     protected abstract collection: string;
-    protected db: admin.firestore.Firestore = createDatabaseConnection();
+    protected db: admin.firestore.Firestore = DatabaseConnection.getInstance();
 
     protected async getDoc(id: string) {
         return await this.db.collection(this.collection).doc(id).get();

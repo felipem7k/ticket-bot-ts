@@ -24,6 +24,18 @@ export default class GuildRepository extends Repository<Guild> {
         return docData.customCreateMessage;
     }
 
+    public async setTicketCategory(
+        guidId: string,
+        categoryId: string
+    ) {
+        await this.update(
+            guidId,
+            {
+                ticket_category_id: categoryId
+            }
+        );
+    }
+
     public async setCustomCreateMessage(
         guidId: string,
         messageParams: SimpleMessageParams 

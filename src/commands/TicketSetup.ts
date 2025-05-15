@@ -2,7 +2,11 @@ import { CommandInteraction } from "discord.js";
 import { Discord, Slash, SlashGroup } from "discordx";
 
 @Discord()
-@SlashGroup({description: "Configurações de tickets", name: "setup"})
+@SlashGroup({
+    description: "Configurações de tickets",
+    name: "setup",
+    defaultMemberPermissions: "Administrator"
+})
 @SlashGroup("setup")
 export class TicketSetup {
     @Slash({description: "Listar possíveis subcomandos"})
