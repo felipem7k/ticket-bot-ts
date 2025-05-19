@@ -57,13 +57,17 @@ export default class CustomContainer {
     public addStringSelectMenu(
         customId: string,
         placeholder: string,
-        options: SelectMenuComponentOptionData[]
+        options: SelectMenuComponentOptionData[],
+        maxValues: number = 1,
+        minValues: number = 1
     ) {
         const row = new ActionRowBuilder<StringSelectMenuBuilder>();
         const selectMenu = new StringSelectMenuBuilder()
         .setCustomId(customId)
         .setPlaceholder(placeholder)
-        .addOptions(options);
+        .addOptions(options)
+        .setMaxValues(maxValues)
+        .setMinValues(minValues);
         row.addComponents(selectMenu);
 
         this._container.addActionRowComponents(row);
